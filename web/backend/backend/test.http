@@ -1,0 +1,10 @@
+### Test Salvare Metadate Video
+POST http://localhost:8080/api/videos/metadata
+Content-Type: application/json
+
+{
+  "filename": "camera_bord_001.mp4",
+  "filepath": "C:/licenta/video_files/camera_bord_001.mp4",
+  "uploaderId": "masina_IS_10_ABC",
+  "roadSegment": "Bulevardul_Stefan_cel_Mare"
+}
