@@ -1,0 +1,22 @@
+# Excludem cache-ul Python 
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Excludem Mediul Virtual 
+venv/
+env/
+
+# Excludem output-urile generate de COLMAP 
+dataset/
+
+# Excludem fisierele video mari 
+*.mp4
+*.MOV
+*.avi
+test_video.mp4
+
+# Excludem fisiere ascunse de sistemul de operare 
+Thumbs.db
+.DS_Store
