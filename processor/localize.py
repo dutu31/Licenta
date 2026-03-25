@@ -1,10 +1,25 @@
 import os
 import subprocess
 import shutil # for file operations
+import cv2
 
 colmap_exe_path=r"A:\LICENTA\COLMAP\colmap-x64-windows-cuda\COLMAP.bat"
 workspace_folder=r"dataset"
 query_image_path=r"dataset\query\query_test.png"
+
+def resize_query_image(img_path, output_path):
+    img=cv2.imread(img_path)
+    if img is None:
+        print(f"Error: Can't find image {img_path}!")
+        return False
+    original_height, original_thickness=img.shape[:2] #4k render and crop
+    bottom_limit=int(original_height*0.80)
+    img_crop=img[0:bottom_limit, 0:original_thickness]
+    scale_factor=1920.0/original_thickness
+    new_height=int(img_crop.shape[0]*scale_factor)
+    img_final=cv2.resize(img_crop, (1920, new_height))
+    cv2.imwrite(output_path, img_final)
+    return True
 
 def localize_image(colmap_exe, workspace, query_image):
     database_path = os.path.join(workspace, "database.db")
