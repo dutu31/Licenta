@@ -2,10 +2,12 @@ import os
 import subprocess
 import shutil # for file operations
 import cv2
+import sqlite3
 
 colmap_exe_path=r"A:\LICENTA\COLMAP\colmap-x64-windows-cuda\COLMAP.bat"
 workspace_folder=r"dataset"
 query_image_path=r"dataset\query\query_test.png"
+cropped_image_path=r"dataset\query\query_test_cropped.png"
 
 def resize_query_image(img_path, output_path):
     img=cv2.imread(img_path)
@@ -34,9 +36,24 @@ def localize_image(colmap_exe, workspace, query_image):
         os.makedirs(text_output)
     image_name=os.path.basename(query_image)
     dest_path=os.path.join(images_folder, image_name)
-    if not os.path.exists(dest_path):
-        shutil.copy2(query_image, dest_path)
-        print(f"Photo was moved to {images_folder}")
+    shutil.copy2(query_image,dest_path)
+    print(f"Photo was moved and overwritten to {images_folder}")
+    if os.path.exists(database_path):
+        try:
+            conn = sqlite3.connect(database_path)
+            cursor = conn.cursor()
+            cursor.execute("SELECT image_id FROM images WHERE name=?", (image_name,))
+            row = cursor.fetchone()
+            if row:
+                img_id = row[0]
+                cursor.execute("DELETE FROM images WHERE image_id=?", (img_id,))
+                cursor.execute("DELETE FROM keypoints WHERE image_id=?", (img_id,))
+                cursor.execute("DELETE FROM descriptors WHERE image_id=?", (img_id,))
+                conn.commit()
+                print(f"Cleared old cache for {image_name} from COLMAP database.")
+            conn.close()
+        except Exception as e:
+            print(f"Warning: Could not clean database cache: {e}")
     
     try:
         print("Extracting features...")
@@ -75,5 +92,10 @@ def localize_image(colmap_exe, workspace, query_image):
         print("Localization completed successfully.")
     except subprocess.CalledProcessError as e:
         print(f"An error occurred: {e}")
-if __name__ == "__main__":    localize_image(colmap_exe_path, workspace_folder, query_image_path)
+if __name__ == "__main__": 
+    is_resized = resize_query_image(query_image_path, cropped_image_path)
+    if is_resized:
+        localize_image(colmap_exe_path, workspace_folder, cropped_image_path)
+    else:
+        print("Process aborted because resizing failed")
         
