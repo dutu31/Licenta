@@ -2,11 +2,11 @@ import subprocess
 import os
 def run_colmap_sfm(colmap_exe_path, workspace_folder, images_folder):
     print(f"Running COLMAP SfM with executable: {colmap_exe_path}")
-    database_path=os.path.join(workspace_folder, "database.db")
-    sparse_path=os.path.join(workspace_folder, "sparse")
+    database_path = os.path.join(workspace_folder, "database.db")
+    sparse_path = os.path.join(workspace_folder, "sparse")
     if not os.path.exists(sparse_path):
         os.makedirs(sparse_path)
-        print(f"Created sparse output folder: {sparse_path}")
+
     try:
         # Step 1: Feature extraction
         cmd_extract=[
@@ -17,30 +17,28 @@ def run_colmap_sfm(colmap_exe_path, workspace_folder, images_folder):
             "--ImageReader.camera_model", "SIMPLE_RADIAL",
         ]
         subprocess.run(cmd_extract, check=True)
-        print("Feature extraction completed successfully.")
-        # Step 2: Sequential matching
+
+        # Step 2: Sequential matching (Overlap 50 pt stabilitate maxima pe 5 FPS)
         cmd_match=[
             colmap_exe_path, "sequential_matcher",
             "--database_path", database_path,
-            "--SequentialMatching.overlap", "15",       
+            "--SequentialMatching.overlap", "50",       
             "--SequentialMatching.loop_detection", "1"
         ]
         subprocess.run(cmd_match, check=True)
-        print("Sequential matching completed successfully.")
-        # Step 3: Mapper 
+
+        # Step 3: Mapper (Cu setarile care repara taierea/crop-ul)
         cmd_mapper=[
             colmap_exe_path, "mapper",
             "--database_path", database_path,
             "--image_path", images_folder,
             "--output_path", sparse_path,
-            "--Mapper.init_min_tri_angle", "1.5",            
-            "--Mapper.tri_min_angle", "1.5",                 
-            "--Mapper.filter_min_tri_angle", "1.5",          
+            "--Mapper.init_min_tri_angle", "2.0",            
             "--Mapper.multiple_models", "0",
-            "--Mapper.abs_pose_min_num_inliers", "15",       
-            "--Mapper.abs_pose_min_inlier_ratio", "0.05",
-            "--Mapper.ba_refine_focal_length", "0",          #no zoom
-            "--Mapper.ba_refine_extra_params", "0"
+            "--Mapper.abs_pose_min_num_inliers", "10",       
+            "--Mapper.ba_refine_focal_length", "1",          
+            "--Mapper.ba_refine_extra_params", "1",
+            "--Mapper.ba_refine_principal_point", "1"  # <--- 
         ]
         subprocess.run(cmd_mapper, check=True)
         print("Mapping completed successfully.")
@@ -51,7 +49,7 @@ def run_colmap_sfm(colmap_exe_path, workspace_folder, images_folder):
 
 def convert_sparse_to_ply(colmap_exe_path, sparse_folder, output_ply_path):
     print(f"Converting COLMAP sparse model to PLY format using executable: {colmap_exe_path}")
-    model_folder=os.path.join(sparse_folder, "0")
+    model_folder=os.path.join(sparse_folder, "2")
     if not os.path.exists(model_folder):
         print(f"Error: COLMAP sparse model folder not found: {model_folder}")
         print("Mapper may not have run successfully or output is in a different location.")

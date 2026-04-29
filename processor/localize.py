@@ -26,7 +26,7 @@ def resize_query_image(img_path, output_path):
 def localize_image(colmap_exe, workspace, query_image):
     database_path = os.path.join(workspace, "database.db")
     images_folder= os.path.join(workspace, "images")
-    sparse_input= os.path.join(workspace, "sparse", "0")
+    sparse_input= os.path.join(workspace, "sparse", "2")
     sparse_output= os.path.join(workspace, "sparse_localized")
     text_output= os.path.join(workspace, "text_localized")
 
@@ -78,8 +78,9 @@ def localize_image(colmap_exe, workspace, query_image):
             "--database_path", database_path,
             "--input_path", sparse_input,
             "--output_path", sparse_output,
-            "--Mapper.ba_refine_focal_length", "0",
-            "--Mapper.ba_refine_extra_params", "0",
+            "--Mapper.ba_refine_focal_length", "1",
+            "--Mapper.ba_refine_extra_params", "1",
+            "--Mapper.ba_refine_principal_point", "1"
         ], check=True)
         print("Exporting results...")
         subprocess.run([
