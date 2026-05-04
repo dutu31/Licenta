@@ -9,6 +9,31 @@ workspace_folder=r"dataset"
 query_image_path=r"dataset\query\query_test.png"
 cropped_image_path=r"dataset\query\query_test_cropped.png"
 
+def get_best_model_path(sparse_folder):
+    if not os.path.exists(sparse_folder):
+        print(f"Error: Sparse folder not found: {sparse_folder}")
+        return None
+    if os.path.exists(os.path.join(sparse_folder, "points3D.bin")) or os.path.exists(os.path.join(sparse_folder, "points3D.txt")):
+        return sparse_folder
+    subdirs = [os.path.join(sparse_folder, d) for d in os.listdir(sparse_folder) if os.path.isdir(os.path.join(sparse_folder, d)) and d.isdigit()]
+    if not subdirs:
+        print(f"Error: No valid sparse model subdirectories found in: {sparse_folder}")
+        return None
+    best_model=None
+    max_size=-1
+    for subdir in subdirs:
+        points_bin=os.path.join(subdir, "points3D.bin")
+        points_txt=os.path.join(subdir, "points3D.txt")
+        size=0
+        if os.path.exists(points_bin):
+            size=os.path.getsize(points_bin)
+        elif os.path.exists(points_txt):
+            size=os.path.getsize(points_txt)
+        if size > max_size:
+            max_size=size
+            best_model=subdir
+    return best_model if best_model else subdirs[0]
+
 def resize_query_image(img_path, output_path):
     img=cv2.imread(img_path)
     if img is None:
@@ -26,7 +51,11 @@ def resize_query_image(img_path, output_path):
 def localize_image(colmap_exe, workspace, query_image):
     database_path = os.path.join(workspace, "database.db")
     images_folder= os.path.join(workspace, "images")
-    sparse_input= os.path.join(workspace, "sparse", "2")
+    extended_dir= os.path.join(workspace, "sparse_extended")
+    sparse_input= get_best_model_path(extended_dir)
+    if sparse_input is None:
+        print("Error: No valid COLMAP sparse model found for localization.")
+        return False
     sparse_output= os.path.join(workspace, "sparse_localized")
     text_output= os.path.join(workspace, "text_localized")
 
@@ -34,15 +63,15 @@ def localize_image(colmap_exe, workspace, query_image):
         os.makedirs(sparse_output)
     if not os.path.exists(text_output):
         os.makedirs(text_output)
-    image_name=os.path.basename(query_image)
-    dest_path=os.path.join(images_folder, image_name)
-    shutil.copy2(query_image,dest_path)
+    safe_image_name="live_localization_query.png"
+    dest_path=os.path.join(images_folder, safe_image_name)
+    shutil.copy2(query_image, dest_path)
     print(f"Photo was moved and overwritten to {images_folder}")
     if os.path.exists(database_path):
         try:
             conn = sqlite3.connect(database_path)
             cursor = conn.cursor()
-            cursor.execute("SELECT image_id FROM images WHERE name=?", (image_name,))
+            cursor.execute("SELECT image_id FROM images WHERE name=?", (safe_image_name,))
             row = cursor.fetchone()
             if row:
                 img_id = row[0]
@@ -50,7 +79,7 @@ def localize_image(colmap_exe, workspace, query_image):
                 cursor.execute("DELETE FROM keypoints WHERE image_id=?", (img_id,))
                 cursor.execute("DELETE FROM descriptors WHERE image_id=?", (img_id,))
                 conn.commit()
-                print(f"Cleared old cache for {image_name} from COLMAP database.")
+                print(f"Cleared old cache for {safe_image_name} from COLMAP database.")
             conn.close()
         except Exception as e:
             print(f"Warning: Could not clean database cache: {e}")
@@ -63,13 +92,13 @@ def localize_image(colmap_exe, workspace, query_image):
             "--database_path", database_path,
             "--image_path", images_folder,
             "--ImageReader.single_camera", "1",
-            "--ImageReader.camera_model", "SIMPLE_RADIAL",
+            "--ImageReader.camera_model", "SIMPLE_RADIAL"
         ], check=True)
         print("Matching features...")
         subprocess.run([
             colmap_exe,
             "exhaustive_matcher",
-            "--database_path", database_path,
+            "--database_path", database_path
         ], check=True)
         print("Registrating image...")
         subprocess.run([
@@ -77,10 +106,7 @@ def localize_image(colmap_exe, workspace, query_image):
             "image_registrator",
             "--database_path", database_path,
             "--input_path", sparse_input,
-            "--output_path", sparse_output,
-            "--Mapper.ba_refine_focal_length", "1",
-            "--Mapper.ba_refine_extra_params", "1",
-            "--Mapper.ba_refine_principal_point", "1"
+            "--output_path", sparse_output
         ], check=True)
         print("Exporting results...")
         subprocess.run([

@@ -125,11 +125,11 @@ if __name__=="__main__":
     new_video="test2_1.mp4"
     #print("Extracting frames from new video for extension...")
     #extract_extensions_frames(new_video, images_folder, prefix="extension_", frames_per_second=5)
-   # extended_sparse_path=run_colmap_extension(colmap_path, workspace_folder, images_folder)
-    #if extended_sparse_path:
-       # convert_extended_to_ply(colmap_path, os.path.join(workspace_folder, "sparse_extended"), output_ply)
-        #print("\nSuccess! Extended Sparse Point Cloud was generated!")
+    extended_sparse_path=run_colmap_extension(colmap_path, workspace_folder, images_folder)
+    if extended_sparse_path:
+        convert_extended_to_ply(colmap_path, os.path.join(workspace_folder, "sparse_extended"), output_ply)
+        print("\nSuccess! Extended Sparse Point Cloud was generated!")
 
-    convert_extended_to_ply(colmap_path, os.path.join(workspace_folder, "sparse_extended"), output_ply)
-    print("\nSuccess! Extended Sparse Point Cloud was generated!")
+    #convert_extended_to_ply(colmap_path, os.path.join(workspace_folder, "sparse_extended"), output_ply)
+    #print("\nSuccess! Extended Sparse Point Cloud was generated!")
     

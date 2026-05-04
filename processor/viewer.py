@@ -71,8 +71,8 @@ def get_camera_position(images_text_path, target_image_name):
 
 
 if __name__=="__main__":
-    path_to_map=os.path.join("dataset", "sparse_model.ply")
+    path_to_map=os.path.join("dataset", "extended_model.ply")
     images_text_path=os.path.join("dataset", "text_localized", "images.txt")
-    target_image="query_test_cropped.png"
+    target_image="live_localization_query.png"
     camera_position=get_camera_position(images_text_path, target_image)
     view_colmap_point_cloud(path_to_map, camera_position)
