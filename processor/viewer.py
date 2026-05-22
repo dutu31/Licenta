@@ -15,7 +15,13 @@ def view_colmap_point_cloud(ply_file_path, camera_pose=None):
     pcd.rotate(R, center=(0, 0, 0))
     print("Visualizing COLMAP point cloud...")
     vis=o3d.visualization.Visualizer()
-    vis.create_window(window_name="COLMAP Sparse Point Cloud", width=800, height=600)
+    vis.create_window(
+        window_name="COLMAP Sparse Point Cloud", 
+        width=960, 
+        height=1000, 
+        left=950, 
+        top=40
+    )
     vis.add_geometry(pcd)
 
     if camera_pose is not None:
