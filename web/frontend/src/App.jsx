@@ -88,6 +88,14 @@ function App() {
     }
   };
 
+  const handleReset = () => {
+    setFile(null);
+    setImagePreview(null);
+    setRecordData(null);
+    setIsLocalized(false);
+    setStatusMessage('');
+  };
+
   const formatDate = (dateString) => {
     const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
     return new Date(dateString).toLocaleDateString('ro-RO', options);
@@ -174,9 +182,16 @@ function App() {
           {isLocalized && (
             <div className="view-container">
               <p className="hint-text">The 3D Map will open directly over this area.</p>
-              <button onClick={handleView} className="action-button view-btn">
-                Open 3D Map (View Location)
-              </button>
+              
+              <div className="action-buttons-group">
+                <button onClick={handleView} className="action-button view-btn">
+                  Open 3D Map (View Location)
+                </button>
+                
+                <button onClick={handleReset} className="action-button reset-btn">
+                  Locate New Image
+                </button>
+              </div>
             </div>
           )}
 
