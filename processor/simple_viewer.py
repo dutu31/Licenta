@@ -25,7 +25,7 @@ def view_colmap_point_cloud(ply_file_path):
     vis.create_window(window_name="COLMAP Point Cloud Viewer", width=1280, height=720)
     vis.add_geometry(pcd)
     opt = vis.get_render_option()
-    opt.background_color = np.asarray([0.0, 0.0, 0.0]) # Fundal negru
+    opt.background_color = np.asarray([0.0, 0.0, 0.0]) # Black background
     opt.point_size = 2.0
     vis.run()
     vis.destroy_window()

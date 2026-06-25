@@ -1,9 +1,9 @@
 body {
   margin: 0;
   padding: 0;
-  background-color: #f4f7f6; /* Un fundal foarte fin, gri-albastrui */
+  background-color: #f4f7f6; 
   display: flex;
-  justify-content: center; /* Centrează pe orizontală */
+  justify-content: center; 
   min-height: 100vh;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }

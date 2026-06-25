@@ -3,7 +3,7 @@ import axios from 'axios';
 import './Login.css'; 
 
 function Login({ onLoginSuccess }) {
-  const [authMode, setAuthMode] = useState('login'); // 'login' sau 'register'
+  const [authMode, setAuthMode] = useState('login'); // 'login' or 'register'
   const [authUsername, setAuthUsername] = useState('');
   const [authPassword, setAuthPassword] = useState('');
   const [authMessage, setAuthMessage] = useState({ text: '', type: '' });

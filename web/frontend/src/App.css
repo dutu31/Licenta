@@ -40,7 +40,7 @@ body {
 
 .image-preview-container {
   width: 100%;
-  max-width: 80% !important; /* Mărit max-width-ul aici */
+  max-width: 80% !important; 
   margin: 0 auto;
   border-radius: 8px;
   overflow: hidden;
@@ -56,7 +56,7 @@ body {
 
 .image-placeholder {
   width: 100%;
-  max-width: 80%; /* Sincronizat cu lățimea previzualizării */
+  max-width: 80%; 
   height: 350px;
   border: 2px dashed #4da8da;
   border-radius: 8px;
@@ -291,7 +291,7 @@ body {
   box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3);
 }
 
-/* MULTIPLE ACTIONS GROUP (VIEW & RESET)     */
+/* MULTIPLE ACTIONS GROUP (VIEW & RESET) */
 .action-buttons-group {
   display: flex;
   flex-direction: column;

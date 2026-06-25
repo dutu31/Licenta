@@ -3,6 +3,8 @@ import subprocess
 import shutil # for file operations
 import cv2
 import sqlite3
+import numpy as np
+from ultralytics import YOLO
 
 colmap_exe_path=r"A:\LICENTA\COLMAP\colmap-x64-windows-cuda\COLMAP.bat"
 workspace_folder=r"dataset"
@@ -48,9 +50,33 @@ def resize_query_image(img_path, output_path):
     cv2.imwrite(output_path, img_final)
     return True
 
+def create_yolo_mask(image_path, mask_dir):
+    model=YOLO("yolov8n-seg.pt")
+    img=cv2.imread(image_path)
+    h,w=img.shape[:2]
+    mask=np.ones((h,w), dtype=np.uint8)*255
+    results=model(image_path, verbose=False)
+    if results[0].masks is not None:
+        for i, mask_data in enumerate(results[0].masks.data):
+            class_id=int(results[0].boxes.cls[i].item())
+            #ignoring id for this classes
+            ignorance_classes=[0, 1, 2, 3, 5, 7] #person, bicycle, car, motorcycle, bus, truck
+            if class_id in ignorance_classes:
+                m=mask_data.cpu().numpy()
+                m_resized=cv2.resize(m, (w,h), interpolation=cv2.INTER_NEAREST)
+                mask[m_resized>0]=0
+    base_name=os.path.basename(image_path)
+    mask_name=base_name + ".png"
+    mask_path=os.path.join(mask_dir, mask_name)
+    cv2.imwrite(mask_path, mask)
+    print(f"Mask created and saved to {mask_path}")
+    return mask_path
+
+
 def localize_image(colmap_exe, workspace, query_image):
     database_path = os.path.join(workspace, "database.db")
     images_folder= os.path.join(workspace, "images")
+    masks_folder= os.path.join(workspace, "masks")
     extended_dir= os.path.join(workspace, "sparse_extended")
     sparse_input= get_best_model_path(extended_dir)
     if sparse_input is None:
@@ -63,10 +89,13 @@ def localize_image(colmap_exe, workspace, query_image):
         os.makedirs(sparse_output)
     if not os.path.exists(text_output):
         os.makedirs(text_output)
+    if not os.path.exists(masks_folder):
+        os.makedirs(masks_folder)
     safe_image_name="live_localization_query.png"
     dest_path=os.path.join(images_folder, safe_image_name)
     shutil.copy2(query_image, dest_path)
     print(f"Photo was moved and overwritten to {images_folder}")
+    create_yolo_mask(dest_path, masks_folder)
     if os.path.exists(database_path):
         try:
             conn = sqlite3.connect(database_path)
@@ -85,12 +114,13 @@ def localize_image(colmap_exe, workspace, query_image):
             print(f"Warning: Could not clean database cache: {e}")
     
     try:
-        print("Extracting features...")
+        print("Extracting features with mask applied...")
         subprocess.run([
             colmap_exe,
             "feature_extractor",
             "--database_path", database_path,
             "--image_path", images_folder,
+            "--ImageReader.mask_path", masks_folder,
             "--ImageReader.single_camera", "1",
             "--ImageReader.camera_model", "SIMPLE_RADIAL"
         ], check=True)
@@ -100,7 +130,7 @@ def localize_image(colmap_exe, workspace, query_image):
             "exhaustive_matcher",
             "--database_path", database_path
         ], check=True)
-        print("Registrating image...")
+        print("Registering image...")
         subprocess.run([
             colmap_exe,
             "image_registrator",

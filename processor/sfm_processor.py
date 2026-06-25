@@ -18,7 +18,7 @@ def run_colmap_sfm(colmap_exe_path, workspace_folder, images_folder):
         ]
         subprocess.run(cmd_extract, check=True)
 
-        # Step 2: Sequential matching (Overlap 50 pt stabilitate maxima pe 5 FPS)
+        # Step 2: Sequential matching (Overlap 50 for maximum stability at 5 fps)
         cmd_match=[
             colmap_exe_path, "sequential_matcher",
             "--database_path", database_path,
@@ -27,7 +27,7 @@ def run_colmap_sfm(colmap_exe_path, workspace_folder, images_folder):
         ]
         subprocess.run(cmd_match, check=True)
 
-        # Step 3: Mapper (Cu setarile care repara taierea/crop-ul)
+        # Step 3: Mapper 
         cmd_mapper=[
             colmap_exe_path, "mapper",
             "--database_path", database_path,
@@ -38,7 +38,7 @@ def run_colmap_sfm(colmap_exe_path, workspace_folder, images_folder):
             "--Mapper.abs_pose_min_num_inliers", "10",       
             "--Mapper.ba_refine_focal_length", "1",          
             "--Mapper.ba_refine_extra_params", "1",
-            "--Mapper.ba_refine_principal_point", "1"  # <--- 
+            "--Mapper.ba_refine_principal_point", "1"  
         ]
         subprocess.run(cmd_mapper, check=True)
         print("Mapping completed successfully.")

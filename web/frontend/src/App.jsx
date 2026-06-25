@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import Login from './Login'; // Importăm noua componentă
+import Login from './Login'; 
 import './App.css';
 
 function App() {
-  // Starea utilizatorului (dacă e null, arătăm Login-ul)
+  
   const [currentUser, setCurrentUser] = useState(null);
 
-  // Stările pentru Dashboard (COLMAP)
+  
   const [file, setFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [recordData, setRecordData] = useState(null);
@@ -101,15 +101,13 @@ function App() {
     return new Date(dateString).toLocaleDateString('ro-RO', options);
   };
 
-  // Randare: Dacă nu e logat, returnăm Componenta Login
   if (!currentUser) {
     return <Login onLoginSuccess={setCurrentUser} />;
   }
 
-  // Randare: Dacă e logat, returnăm Dashboard-ul
   return (
     <div className="main-layout">
-      {/* JUMĂTATEA STÂNGĂ */}
+      {/* JUMATATEA STÂNGĂ */}
       <div className="left-panel">
         <h2 className="panel-title">Your image preview</h2>
         {imagePreview ? (
@@ -123,7 +121,7 @@ function App() {
         )}
       </div>
 
-      {/* JUMĂTATEA DREAPTĂ */}
+      {/* JUMATATEA DREAPTA */}
       <div className="right-panel">
         <div className="app-container">
           <div className="dashboard-header">

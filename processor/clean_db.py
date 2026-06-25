@@ -7,7 +7,6 @@ if os.path.exists(db_path):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     
-    # Numele imaginilor pe care vrem sa le scoatem definitiv din baza de date
     bad_images = ["query_test.png", "query_test_cropped.png"]
     
     for img_name in bad_images:
